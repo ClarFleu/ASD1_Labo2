@@ -2,3 +2,9 @@
 Makefile
 
 nbproject/
+
+build/
+
+dist/
+
+\.dep\.inc
