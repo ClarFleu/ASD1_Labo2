@@ -51,3 +51,7 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
         rotation(r, rotNum+1, rotations);
     }
 }
+
+bool pieceValable() {
+    
+}
