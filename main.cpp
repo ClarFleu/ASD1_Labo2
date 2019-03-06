@@ -12,6 +12,11 @@
 
 using namespace std;
 
+void rotationPiece(Piece piece)
+{
+
+}
+
 int main() {
    
    
