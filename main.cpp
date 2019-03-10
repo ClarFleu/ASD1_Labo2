@@ -12,10 +12,19 @@
 
 using namespace std;
 
-void rotation(const Piece& piece, int rotNum, Pieces& rotations);
+// Compteur de solutions
+unsigned nbSolutions = 0;
+// Vecteur de solution
+Pieces solution;
+// Toutes les pieces possibles (y compris les rotations)
+Pieces pieces;
+
+void placerPiece(int positionPiece);
+bool pieceValable(const Piece& piece);
+int pieceSuivante(int positionPiece);
+int rotationOuPieceSuivante(int positionPiece);
 
 int main() {
-    Pieces pieces;
     cout << PIECES.size() << " pieces." << endl;
     
     for (int i = 0; i < PIECES.size(); ++i) {
@@ -24,21 +33,56 @@ int main() {
     }
     cout << pieces.size() << " rotations en tout." << endl;
     
+
+    cout << "Nb solution totale = " << nbSolutions << endl;
+    
+    /* affichage de toutes les pieces et leurs rotations
     for (size_t i = 0; i < pieces.size(); ++i) {
         cout << pieces.at(i) << endl;
-        cout << endl;
-    }
+    }*/
     
     return 0;
 }
 
-bool placerPiece(const Piece& piece) {
-    
-    return true;
+void placerPiece(int positionPiece) {
+    if (solution.size() == 9) {
+        ++nbSolutions;
+         // On affiche les solutions
+         for(Piece p : solution) {
+         cout << p << ' ';
+         }
+    } else if (positionPiece >= pieces.size() || rotationOuPieceSuivante(positionPiece) < 0) {
+        return;
+    } else {
+        if (pieceValable(pieces.at(positionPiece))) {
+            solution.push_back(pieces.at(positionPiece));
+            return placerPiece(pieceSuivante(positionPiece));
+        }
+    }
+    placerPiece(positionPiece);
 }
 
-bool pieceValable(const Piece& piece, const Pieces& tab, size_t position) {
+bool pieceValable(const Piece& piece) {
     
     
     return false;
+}
+
+int pieceSuivante(int positionPiece){
+    size_t tailleMax = pieces.size() - positionPiece;
+    if (tailleMax > 4) {
+        for (int a = 0; a < tailleMax; ++a) {
+            if (!memePiece(pieces.at(positionPiece), pieces.at(positionPiece+a))) {
+                return a;
+            }
+        }
+    }
+    return -1;
+}
+
+int rotationOuPieceSuivante(int positionPiece){
+    if (positionPiece < pieces.size()-1) {
+        return ++positionPiece;
+    }
+    return -1;
 }

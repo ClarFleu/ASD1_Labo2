@@ -86,3 +86,15 @@ std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
     }
     return lhs;
 }
+
+bool memePiece(const Piece& piece1, const Piece& piece2) {
+    Pieces rotations;
+    rotations.push_back(piece1);
+    rotation(piece1, 0, rotations);
+    for (int i = 0; i < rotations.size(); ++i) {
+        if (piece2 == rotations.at(i)) {
+            return true;
+        }
+    }
+    return false;
+}
