@@ -11,6 +11,7 @@
 
 #include <array>
 #include <vector>
+#include <string>
 
 enum AttachementType {
   FILLE_HAUT, FILLE_BAS, DAME_HAUT, DAME_BAS, ARROSOIR_GAUCHE, ARROSOIR_DROIT, GATEAU_GAUCHE, GATEAU_DROIT,  ARROSOIR_INVERSE, NONE };
@@ -19,5 +20,13 @@ using Piece  = std::array<AttachementType,4>;
 using Pieces = std::vector<Piece>;
 
 extern const Pieces PIECES;
+
+std::ostream& operator<<(std::ostream& lhs, const Piece& rhs);
+
+std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs);
+
+bool operator==(const Piece& lhs, const Piece& rhs);
+
+void rotation(const Piece& piece, int rotNum, Pieces& rotations);
 
 #endif /* pieces_h */

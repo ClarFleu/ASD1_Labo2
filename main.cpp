@@ -24,6 +24,11 @@ int main() {
     }
     cout << pieces.size() << " rotations en tout." << endl;
     
+    for (size_t i = 0; i < pieces.size(); ++i) {
+        cout << pieces.at(i) << endl;
+        cout << endl;
+    }
+    
     return 0;
 }
 
@@ -32,26 +37,8 @@ bool placerPiece(const Piece& piece) {
     return true;
 }
 
-void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
+bool pieceValable(const Piece& piece, const Pieces& tab, size_t position) {
     
-    if(rotNum == 3) {
-        return;
-    } else {
-        Piece r;
-        
-        AttachementType temp = piece.at(rotNum);
-        
-        for (int i = 0; i < 3; ++i) {
-            r.at(i) = piece.at(i+1);
-        }
-        r.at(3) = temp;
-        
-        rotations.push_back(r);
-        
-        rotation(r, rotNum+1, rotations);
-    }
-}
-
-bool pieceValable() {
     
+    return false;
 }
