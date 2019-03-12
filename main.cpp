@@ -19,7 +19,8 @@ Pieces solution;
 // Toutes les pieces possibles (y compris les rotations)
 Pieces pieces;
 
-void placerPiece(int positionPiece);
+// void placerPiece(int positionPiece);
+void placerPiece(const Piece& premierePiece, const Piece& pieceAPlacer);
 bool pieceValable(const Piece& piece);
 int pieceSuivante(int positionPiece);
 int rotationOuPieceSuivante(int positionPiece);
@@ -34,7 +35,7 @@ int main() {
     cout << pieces.size() << " rotations en tout." << endl;
     
 
-    cout << "Nb solution totale = " << nbSolutions << endl;
+    cout << "Nb solution totale : " << nbSolutions << endl;
     
     /* affichage de toutes les pieces et leurs rotations
     for (size_t i = 0; i < pieces.size(); ++i) {
@@ -44,13 +45,30 @@ int main() {
     return 0;
 }
 
+void placerPiece(const Piece& premierePiece, const Piece& pieceAPlacer) {
+    if (solution.size() == 9) {
+        ++nbSolutions;
+        // On affiche la solution trouvée
+        int cpt = 0;
+        for(Piece p : solution) {
+            cout << p;
+            if (cpt % 3)
+                cout << endl;
+            else
+                cout << ' ';
+        }
+        placerPiece(pieceSuivante(premierePiece), pieceSuivante(pieceSuivante(premierePiece)))
+    } else if (<#condition#>)
+    
+}
+
+/*
 void placerPiece(int positionPiece) {
     if (solution.size() == 9) {
         ++nbSolutions;
-         // On affiche les solutions
-         for(Piece p : solution) {
-         cout << p << ' ';
-         }
+        // On affiche les solutions
+        for(Piece p : solution)
+            cout << p << ' ';
     } else if (positionPiece >= pieces.size() || rotationOuPieceSuivante(positionPiece) < 0) {
         return;
     } else {
@@ -61,7 +79,7 @@ void placerPiece(int positionPiece) {
     }
     placerPiece(positionPiece);
 }
-
+*/
 bool pieceValable(const Piece& piece) {
     
     
