@@ -40,7 +40,7 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations);
 bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2);
 
 Piece rotationSimple(const Piece& oldPiece, int nbr);
-
+/*
 int main() {
 
    Solutions mesSolu;
@@ -63,7 +63,7 @@ int main() {
 
 
    return 0;
-}
+}*/
 
 void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
 
