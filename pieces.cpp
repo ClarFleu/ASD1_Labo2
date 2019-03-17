@@ -8,8 +8,6 @@
 
 #include "pieces.h"
 
-#include <iostream>
-
 const Pieces PIECES = {
   { DAME_HAUT, GATEAU_DROIT, ARROSOIR_GAUCHE, FILLE_HAUT }, //1
   { DAME_BAS, ARROSOIR_GAUCHE, FILLE_HAUT, GATEAU_DROIT },  //2

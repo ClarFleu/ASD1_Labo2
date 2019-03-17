@@ -7,22 +7,35 @@
 //
 
 #include <iostream>
+#include <vector>
 
 #include "pieces.h"
 
 using namespace std;
 
-// Compteur de solutions
-unsigned nbSolutions = 0;
-// Vecteur de solution
-Pieces solution;
+const Piece PIECE_VIDE = {NONE, NONE, NONE, NONE};
 // Toutes les pieces possibles (y compris les rotations)
 Pieces pieces;
+// Compteur de solutions --> devrait être égal à toutesLesSolutions.size()
+unsigned nbSolutions = 0;
 
-// void placerPiece(int positionPiece);
-void placerPiece(const Piece& premierePiece, const Piece& pieceAPlacer);
+unsigned piecesTentees = 0;
+// Vecteur de solution
+Pieces solution(9), plan(9);
+// Vecteur contenant toutes les solutions trouvées
+vector<Pieces> toutesLesSolutions;
 
-bool pieceValable(const Piece& piece);
+vector<vector<size_t>> getAdjacents(size_t pos);
+
+void placerPiece(Pieces& plan, size_t piece, unsigned positionPiece);
+//void placerPiece(int positionPiece);
+//void placerPiece(const Piece& piece);
+
+void afficherSolution(const Pieces& sol);
+
+bool imageComplete(const AttachementType& im1, const AttachementType& im2);
+
+bool pieceValable(size_t posPiece);
 
 int pieceSuivante(int positionPiece);
 
@@ -39,7 +52,14 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations);
 bool memePiece(const Piece& piece1, const Piece& piece2);
 
 
+// osdjpaéokdjsf
+void casseTeteReq(Pieces& aUtiliser, Pieces& plan);
+void casseTete();
+
 int main() {
+   for (size_t i = 0; i < 9; ++i) {
+      plan.at(i) = PIECE_VIDE;
+   }
     cout << PIECES.size() << " pieces." << endl;
     
     for (int i = 0; i < PIECES.size(); ++i) {
@@ -47,8 +67,10 @@ int main() {
         rotation(PIECES.at(i), 0, pieces);
     }
     cout << pieces.size() << " rotations en tout." << endl;
-    
-
+   
+   casseTete();
+    //placerPiece(solution, 0, 0);
+   
     cout << "Nb solution totale : " << nbSolutions << endl;
     
     /* affichage de toutes les pieces et leurs rotations
@@ -59,66 +81,85 @@ int main() {
     return 0;
 }
 
-void placerPiece(const Piece& premierePiece, const Piece& pieceAPlacer) {
-    if (solution.size() == 9) {
-        ++nbSolutions;
-        // On affiche la solution trouvée
-        int cpt = 0;
-        for(Piece p : solution) {
-            cout << p;
-            if (cpt % 3)
-                cout << endl;
-            else
-                cout << ' ';
-        }
-        //placerPiece(pieceSuivante(premierePiece), pieceSuivante(pieceSuivante(premierePiece)))
-    } else if (false){
-       
-    }
-    
+void casseTete() {
+   Pieces aUtiliser = PIECES;
+   casseTeteReq(aUtiliser, plan);
 }
 
-/*
-void placerPiece(int positionPiece) {
-    if (solution.size() == 9) {
-        ++nbSolutions;
-        // On affiche les solutions
-        for(Piece p : solution)
-            cout << p << ' ';
-    } else if (positionPiece >= pieces.size() || rotationOuPieceSuivante(positionPiece) < 0) {
-        return;
-    } else {
-        if (pieceValable(pieces.at(positionPiece))) {
-            solution.push_back(pieces.at(positionPiece));
-            return placerPiece(pieceSuivante(positionPiece));
-        }
-    }
-    placerPiece(positionPiece);
-}
-*/
-bool pieceValable(const Piece& piece) {
-    
-    
-    return false;
-}
-
-int pieceSuivante(int positionPiece){
-    size_t tailleMax = pieces.size() - positionPiece;
-    if (tailleMax > 4) {
-        for (int a = 0; a < tailleMax; ++a) {
-            if (!memePiece(pieces.at(positionPiece), pieces.at(positionPiece+a))) {
-                return a;
+void casseTeteReq(Pieces& aUtiliser, Pieces& plan) {
+   if (aUtiliser.size() == 0) {
+      bool sol = true;
+      for (int i = 0; i < plan.size(); ++i) {
+         if (plan.at(i)==PIECE_VIDE) {
+            sol = false;
+            break;
+         }
+      }
+      if (sol) {
+         ++nbSolutions;
+         afficherSolution(plan);
+      }
+      return;
+   } else {
+      
+      
+      size_t positionPiece;
+      for (size_t i = 0; i < plan.size(); ++i) {
+         if(plan.at(i)==PIECE_VIDE) {
+             positionPiece = i;
+            break;
+         } else {
+            positionPiece = -1;
+         }
+      }
+      
+      for (size_t pPos = 0; pPos < aUtiliser.size(); ++pPos) {
+         Piece piece = aUtiliser.at(pPos);
+         
+         vector<vector<size_t>> adj = getAdjacents(positionPiece);
+         Pieces rotationsP;
+         rotationsP.push_back(piece);
+         rotation(piece, 0, rotationsP);
+         bool piecesPlaceable = true;
+         
+         // on parcourt toutes les rotations de la pieces
+         for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
+            
+            for (size_t i = 0; i < adj.size(); ++i) {
+               // on test si la piece peut entrer
+               size_t POSITION_PIECE_COURANTE = adj.at(i).at(0),
+                      PIECE_ADJ = adj.at(i).at(1),
+                      POSITION_PIECE_ADJ = adj.at(i).at(2);
+               piecesPlaceable = imageComplete(rotationsP.at(rot).at(POSITION_PIECE_COURANTE), plan.at(PIECE_ADJ).at(POSITION_PIECE_ADJ));
             }
-        }
-    }
-    return -1;
+            
+            if (piecesPlaceable) {
+               if (pPos >= aUtiliser.size()) {
+                  plan.at(positionPiece) = rotationsP.at(rot);
+                  casseTeteReq(aUtiliser, plan);
+               } else {
+                  plan.at(positionPiece) = rotationsP.at(rot);
+                  aUtiliser.erase(aUtiliser.begin() + pPos);
+                  casseTeteReq(aUtiliser, plan);
+                  plan.at(positionPiece) = PIECE_VIDE;
+                  aUtiliser.push_back(piece);
+               }
+            }
+         }
+         //aUtiliser.erase(aUtiliser.begin() + pPos);
+      }
+   }
+   return;
 }
 
-int rotationOuPieceSuivante(int positionPiece){
-    if (positionPiece < pieces.size()-1) {
-        return ++positionPiece;
-    }
-    return -1;
+void afficherSolution(const Pieces& sol) {
+   for (int i = 0; i < sol.size();++i) {
+      cout << sol.at(i) << " ";
+      if (i%3==2) {
+         cout << endl;
+      }
+   }
+   cout << endl;
 }
 
 void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
@@ -141,7 +182,42 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
    }
 }
 
-
+vector<vector<size_t>> getAdjacents(size_t pos) {
+   vector<vector<size_t>> v;
+   switch (pos) {
+      case 0:
+         v = {};
+         break;
+      case 1:
+         v = {{3, 0, 1}};
+         break;
+      case 2:
+         v = {{3, 1, 1}};
+         break;
+      case 3:
+         v = {{0, 0, 2}};
+         break;
+      case 4:
+         v = {{0, 1, 2}, {3, 3, 1}};
+         break;
+      case 5:
+         v = {{0, 2, 2}, {3, 4, 1}};
+         break;
+      case 6:
+         v = {{0, 3, 2}};
+         break;
+      case 7:
+         v = {{0, 4, 2}, {3, 6, 1}};
+         break;
+      case 8:
+         v = {{0, 5, 2}, {3, 7, 1}};
+         break;
+         
+      default:
+         break;
+   }
+   return v;
+}
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
    for (int i = 0; i < 4; ++i) {
@@ -150,6 +226,24 @@ bool operator==(const Piece& lhs, const Piece& rhs) {
       }
    }
    return true;
+}
+
+bool imageComplete(const AttachementType& im1, const AttachementType& im2) {
+   switch (im1) {
+      case FILLE_HAUT:       return im2 == FILLE_BAS;
+      case FILLE_BAS:        return im2 == FILLE_HAUT;
+      case DAME_HAUT:        return im2 == DAME_BAS;
+      case DAME_BAS:         return im2 == DAME_HAUT;
+      case ARROSOIR_GAUCHE:  return im2 == ARROSOIR_DROIT;
+      case ARROSOIR_DROIT:   return im2 == ARROSOIR_GAUCHE;
+      case GATEAU_GAUCHE:    return im2 == GATEAU_DROIT;
+      case GATEAU_DROIT:     return im2 == GATEAU_GAUCHE;
+      case ARROSOIR_INVERSE: return false;
+      case NONE:             return im2 == NONE;
+         
+      default:
+         return false;
+   }
 }
 
 std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
@@ -171,14 +265,13 @@ std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
    
 }
 
-
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
    
    for (int i = 0; i < 9; ++i) {
       Pieces rotations;
       rotations.push_back(PIECES.at(i));
       rotation(PIECES.at(i), 0, rotations);
-      char r = 'A';
+      char r = 'a';
       for (int j = 0; j < 4; ++j) {
          if (rhs == rotations.at(j)) {
             return lhs << i+1 << r;
