@@ -16,14 +16,14 @@ using namespace std;
 
 const Piece BLANK{ NONE, NONE, NONE, NONE};
 
-using Solutions = vector<string>;
+using Solutions = vector<Pieces>;
 
 
 bool estAttachableAttachementType(AttachementType first, AttachementType second);
 
 bool estAttachable(const Pieces& jeu, int position1, int position2);
 
-Pieces fonctionRecursion(const Pieces& oldJeu, Solutions& solutions);
+Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions);
 
 bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu);
 
@@ -51,13 +51,22 @@ int main() {
       BLANK, BLANK, BLANK
    };
 
+   Pieces freePieces = PIECES;
+   
+  
 
-   //fonctionRecursion(jeuTest, mesSolu);
+   fonctionRecursion(jeuTest, freePieces, mesSolu);
 
    cout << "-------------------\n---------------------\n---------------------\n---------------------\n---------------------" << endl;
 
-   for (const string& s : mesSolu) {
-      cout << s << endl;
+   int z = 0;
+   for (const Pieces& P : mesSolu) {
+      for (const Piece&p : P) {
+         cout << p << " ";
+      }
+
+      cout << endl;
+
    }
 
 
@@ -88,7 +97,7 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
 //y compris les rotations
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
-   
+
    return (EXACTEMENTmemePiece(lhs, rhs) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 1)) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 2)) ||
@@ -125,20 +134,24 @@ std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
 
 }
 
+
+
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
 
-   for (int i = 0; i < 9; ++i) {
-      Pieces rotations;
-      rotations.push_back(PIECES.at(i));
-      rotation(PIECES.at(i), 0, rotations);
-      char r = 'A';
-      for (int j = 0; j < 4; ++j) {
-         if (rhs == rotations.at(j)) {
-            return lhs << i + 1 << r;
+   
+   for(size_t k=0; k<PIECES.size();k++){
+      if(rhs==PIECES.at(k)){
+         
+         for(int l=0; l<4;l++){
+            char c = 'a';
+            if(EXACTEMENTmemePiece(rotationSimple(PIECES.at(k),l),rhs)){
+               return lhs << k+1 << char (c+l);
+            }
+            
          }
-         ++r;
       }
    }
+
    return lhs;
 }
 
@@ -165,10 +178,10 @@ int findNextFreePiece(const Pieces& usedPieces, int positionOfLastPiece) {
 
    for (size_t i = positionOfLastPiece; i < PIECES.size(); i++) {
       //cout << "boucle i" << endl;
-      if (i>PIECES.size())
+      if (i > PIECES.size())
          cout << "error" << endl;
-      if (find(usedPieces.begin(), usedPieces.end(), PIECES.at(i)) == usedPieces.end()){
-         cout << find(usedPieces.begin(), usedPieces.end(), PIECES.at(i))-usedPieces.begin()<< endl;
+      if (find(usedPieces.begin(), usedPieces.end(), PIECES.at(i)) == usedPieces.end()) {
+         cout << find(usedPieces.begin(), usedPieces.end(), PIECES.at(i)) - usedPieces.begin() << endl;
          return i;
       }
    }
@@ -211,7 +224,7 @@ bool estAttachable(const Pieces& jeu, int position1, int position2) {
 
 
    else if (relatifHori == 1 && relatifVerti == 0)
-      return estAttachableCoteACote(jeu.at(post), jeu.at(pre), true);
+      return estAttachableCoteACote(jeu.at(pre), jeu.at(post), true);
 
    else {
       cout << "something went wrong, not placable because no edge in contact" << endl;
@@ -226,7 +239,12 @@ bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal)
    return estAttachableAttachementType(up.at(0 + horizontal), down.at(2 + horizontal));
 }
 
-bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu) {
+bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
+
+   Pieces jeu = oldJeu;
+   jeu.at(position) = newPiece;
+
+
    switch (position) {
       case 0:
          return (estAttachable(jeu, 0, 1) && estAttachable(jeu, 0, 3));
@@ -254,14 +272,9 @@ bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu) {
 
 //recupere le string d'un jeu
 
-string getString(const Pieces& jeu) {
-   return "jeej";
-}
-
-Pieces fonctionRecursion(const Pieces& oldJeu, Solutions& solutions) {
+Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions) {
 
 
-   Pieces jeu = oldJeu;
 
 
    auto iter = find(oldJeu.begin(), oldJeu.end(), BLANK); //on trouve la premiere place libre
@@ -269,29 +282,37 @@ Pieces fonctionRecursion(const Pieces& oldJeu, Solutions& solutions) {
 
    int firstBLANKposition = (iter - oldJeu.begin());
 
+
+
    if (iter == oldJeu.end()) {//si le jeu est remplis, ca veut dire que c'est une solution
 
-      solutions.push_back(getString(oldJeu));
+
+      solutions.push_back(oldJeu);
       //ca sert a rien de faire les autres pieces, on teste d'autres jeu
 
    } else {//le jeu est pas fini
 
-      //recupere la prochaine piece libre 
-      int selectedPiecePosition = findNextFreePiece(oldJeu, 0);
 
-      if (selectedPiecePosition == -1) {
+      if (freePieces.size() == 0) {
          cout << "plus de piece libre, ne devrait pas arriver" << endl; //comme s'il y a des BLANKS il y a des pieces libre
       }
+
+
+      int selectedPiecePosition = 0;
+
 
       //debug
       int controlePiece = 0;
 
-      while ((selectedPiecePosition != -1) || (controlePiece = !100)) {
+      do {
+
+         //cout << controlePiece << endl;
+         //recupere la prochaine piece libre 
 
          //debug
          controlePiece++;
 
-         Piece selectedPiece = PIECES.at(selectedPiecePosition);
+         Piece selectedPiece = freePieces.at(selectedPiecePosition);
          //cout << selectedPiecePosition << endl;
 
          int rotationCounter = 0;
@@ -300,17 +321,23 @@ Pieces fonctionRecursion(const Pieces& oldJeu, Solutions& solutions) {
 
          while ((rotationCounter < 4) || (controleRotation = !100)) {
 
+            //cout << rotationCounter << endl;
+
             //debug
             controleRotation++;
 
             if (estPlacable(selectedPiece, firstBLANKposition, oldJeu)) {
-               
+
                Pieces jeu = oldJeu;
+               Pieces freePiecesCopy = freePieces;
+               freePiecesCopy.erase(freePiecesCopy.begin() + selectedPiecePosition);
+
                jeu.at(firstBLANKposition) = selectedPiece;
-               fonctionRecursion(jeu, solutions);
-               rotationCounter = 7; //break in disguise (basé sur la logique que si cette piece passe dans cette rotation, elle passera jamais dans une autre)
+               fonctionRecursion(jeu, freePiecesCopy, solutions);
+               rotationCounter++;
+               selectedPiece = rotationSimple(selectedPiece, 1); //break in disguise (basé sur la logique que si cette piece passe dans cette rotation, elle passera jamais dans une autre)
             } else {
-               cout << "piece pas posee" << endl;
+               //cout << "piece pas posee" << endl;
                rotationCounter++;
                selectedPiece = rotationSimple(selectedPiece, 1);
             }
@@ -322,9 +349,9 @@ Pieces fonctionRecursion(const Pieces& oldJeu, Solutions& solutions) {
             cout << "rotation boucle infinie" << endl;
          }
 
-         int selectedPiecePosition = findNextFreePiece(oldJeu, selectedPiecePosition);
+         selectedPiecePosition++;
 
-      }
+      } while ((selectedPiecePosition < freePieces.size()) || (controlePiece = !100));
 
       //debug
       if (controlePiece == 100) {

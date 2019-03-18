@@ -7,7 +7,6 @@
 //
 
 #include <iostream>
-#include <vector>
 
 #include "pieces.h"
 #include <algorithm>
@@ -32,7 +31,7 @@ Pieces plan(9);
  ***************************/
 void afficherSolution(const Pieces& sol);
 
-bool imageComplete(const AttachementType& im1, const AttachementType& im2);
+bool estAttachable(const Pieces& jeu, int position1, int position2);
 
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs);
 
@@ -298,8 +297,18 @@ bool memePiece(const Piece& lhs, const Piece& rhs) {
 }
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
+
+   return (EXACTEMENTmemePiece(lhs, rhs) ||
+           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 1)) ||
+           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 2)) ||
+           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 3)));
+
+}
+
+bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
+
    for (int i = 0; i < 4; ++i) {
-      if (lhs.at(i) != rhs.at(i)) {
+      if (piece1.at(i) != piece2.at(i)) {
          return false;
       }
    }
@@ -343,20 +352,24 @@ std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
    
 }
 
+
+
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
+
    
-   for (int i = 0; i < 9; ++i) {
-      Pieces rotations;
-      rotations.push_back(PIECES.at(i));
-      rotation(PIECES.at(i), 0, rotations);
-      char r = 'a';
-      for (int j = 0; j < 4; ++j) {
-         if (rhs == rotations.at(j)) {
-            return lhs << i + 1 << r;
+   for(size_t k=0; k<PIECES.size();k++){
+      if(rhs==PIECES.at(k)){
+         
+         for(int l=0; l<4;l++){
+            char c = 'a';
+            if(EXACTEMENTmemePiece(rotationSimple(PIECES.at(k),l),rhs)){
+               return lhs << k+1 << char (c+l);
+            }
+            
          }
-         ++r;
       }
    }
+
    return lhs;
    
 }
