@@ -27,8 +27,6 @@ Pieces solution(9);
 // Vecteur contenant toutes les solutions trouvées
 vector<Pieces> toutesLesSolutions;
 
-vector<vector<size_t>> getAdjacents(size_t pos);
-
 void placerPiece(Pieces& plan, size_t piece, unsigned positionPiece);
 
 void afficherSolution(const Pieces& sol);
@@ -50,8 +48,7 @@ bool operator==(const Piece& lhs, const Piece& rhs);
 void rotation(const Piece& piece, int rotNum, Pieces& rotations);
 
 // osdjpaéokdjsf
-void casseTeteReq(Pieces& aUtiliser, Pieces& plan, int indicePiece);
-void casseTete();
+void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece);
 AttachementType visAVis(size_t positionPiece, size_t positionImage);
 Pieces plan(9), plan1(9), plan2(9);
 
@@ -69,7 +66,7 @@ int main() {
    }
    cout << pieces.size() << " rotations en tout." << endl;
    
-   casseTete();
+   casseTete(PIECES, plan, 0);
    //placerPiece(solution, 0, 0);
    
    cout << "Nb solution totale : " << nbSolutions << endl;
@@ -82,13 +79,8 @@ int main() {
    return 0;
 }
 
-void casseTete() {
-   Pieces aUtiliser = PIECES;
-   casseTeteReq(aUtiliser, plan, 0);
-}
-
-void casseTeteReq(Pieces& aUtiliser, Pieces& plan, int indicePiece) {
-   if (indicePiece >= aUtiliser.size()) {
+void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece) {
+   if (indicePiece >= listePieces.size()) {
       bool sol = true;
       for (int i = 0; i < plan.size(); ++i) {
          if (plan.at(i)==PIECE_VIDE) {
@@ -102,36 +94,42 @@ void casseTeteReq(Pieces& aUtiliser, Pieces& plan, int indicePiece) {
       }
       return;
    } else {
-      
-         Piece piece = aUtiliser.at(indicePiece);
-         
-         vector<vector<size_t>> adj = getAdjacents(indicePiece);
-         Pieces rotationsP;
-         rotationsP.push_back(piece);
-         rotation(piece, 0, rotationsP);
-         bool piecesPlaceable = true;
-         
-         // on parcourt toutes les rotations de la pieces
-         for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
-            // on regarde si la rotation peut être placée
-            for (int i = 0; i < 4; ++i) {
-               //piecesPlaceable = imageComplete(rotationsP.at(rot).at(i), visAVis(positionPiece, i));
-               
-               if (!imageComplete(rotationsP.at(rot).at(i), visAVis(indicePiece, i)) ) {
-                  piecesPlaceable = false;
-               }
-               //piecesPlaceable = true;
-            }
-            // Si elle peut être placée
-            if (piecesPlaceable) {
-               // On la met à la bonne position sur le plan
-               plan.at(indicePiece) = rotationsP.at(rot);
-               
-               // On appelle la récursive afin de continuer
-               casseTeteReq(aUtiliser, plan, indicePiece+1);
-               
-               plan.at(indicePiece) = PIECE_VIDE;
+      size_t positionVide = -1;
+      for (size_t i = 0; i < plan.size(); ++i) {
+         if (plan.at(i) == PIECE_VIDE) {
+            positionVide = i;
+            break;
          }
+      }
+      
+      Piece piece = listePieces.at(indicePiece);
+      
+      Pieces rotationsP;
+      rotationsP.push_back(piece);
+      rotation(piece, 0, rotationsP);
+      bool piecesPlaceable = true;
+      
+      // on parcourt toutes les rotations de la pieces
+      for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
+         // on regarde si la rotation peut être placée
+         for (int i = 0; i < 4; ++i) {
+            //piecesPlaceable = imageComplete(rotationsP.at(rot).at(i), visAVis(positionPiece, i));
+            
+            if (!imageComplete(rotationsP.at(rot).at(i), visAVis(positionVide, i)) ) {
+               piecesPlaceable = false;
+            }
+            //piecesPlaceable = true;
+         }
+         // Si elle peut être placée
+         if (piecesPlaceable) {
+            // On la met à la bonne position sur le plan
+            plan.at(positionVide) = rotationsP.at(rot);
+            
+            // On appelle la récursive afin de continuer
+            casseTete(listePieces, plan, indicePiece+1);
+            
+            plan.at(indicePiece) = PIECE_VIDE;
+      }
       }
    }
 }
@@ -164,43 +162,6 @@ void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
       
       rotation(r, rotNum + 1, rotations);
    }
-}
-
-vector<vector<size_t>> getAdjacents(size_t pos) {
-   vector<vector<size_t>> v;
-   switch (pos) {
-      case 0:
-         v = {};
-         break;
-      case 1:
-         v = {{3, 0, 1}};
-         break;
-      case 2:
-         v = {{3, 1, 1}};
-         break;
-      case 3:
-         v = {{0, 0, 2}};
-         break;
-      case 4:
-         v = {{0, 1, 2}, {3, 3, 1}};
-         break;
-      case 5:
-         v = {{0, 2, 2}, {3, 4, 1}};
-         break;
-      case 6:
-         v = {{0, 3, 2}};
-         break;
-      case 7:
-         v = {{0, 4, 2}, {3, 6, 1}};
-         break;
-      case 8:
-         v = {{0, 5, 2}, {3, 7, 1}};
-         break;
-         
-      default:
-         break;
-   }
-   return v;
 }
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
