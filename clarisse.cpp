@@ -1,4 +1,3 @@
-
 //
 //  clarisse.cpp
 //  Labo2
@@ -6,7 +5,7 @@
 //  Created by Clarisse Fleurimont on 17.03.19.
 //  Copyright © 2019 Clarisse Fleurimont. All rights reserved.
 //
-/*
+
  #include <iostream>
  #include <vector>
  
@@ -337,4 +336,3 @@
  }
  return lhs;
  }
- */

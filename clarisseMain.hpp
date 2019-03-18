@@ -1,10 +1,13 @@
 //
-//  clarisse.cpp
+//  clarisseMain.hpp
 //  Labo2
 //
-//  Created by Clarisse Fleurimont on 17.03.19.
+//  Created by Clarisse Fleurimont on 18.03.19.
 //  Copyright © 2019 Clarisse Fleurimont. All rights reserved.
 //
+
+#ifndef clarisseMain_hpp
+#define clarisseMain_hpp
 
 #include <iostream>
 #include <vector>
@@ -75,9 +78,9 @@ int main() {
    cout << "Nb solution totale : " << nbSolutions << endl;
    
    /* affichage de toutes les pieces et leurs rotations
-   for (size_t i = 0; i < pieces.size(); ++i) {
-      cout << pieces.at(i) << endl;
-   }*/
+    for (size_t i = 0; i < pieces.size(); ++i) {
+    cout << pieces.at(i) << endl;
+    }*/
    
    return 0;
 }
@@ -103,34 +106,34 @@ void casseTeteReq(Pieces& aUtiliser, Pieces& plan, int indicePiece) {
       return;
    } else {
       
-         Piece piece = aUtiliser.at(indicePiece);
-         
-         vector<vector<size_t>> adj = getAdjacents(indicePiece);
-         Pieces rotationsP;
-         rotationsP.push_back(piece);
-         rotation(piece, 0, rotationsP);
-         bool piecesPlaceable = true;
-         
-         // on parcourt toutes les rotations de la pieces
-         for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
-            // on regarde si la rotation peut être placée
-            for (int i = 0; i < 4; ++i) {
-               //piecesPlaceable = imageComplete(rotationsP.at(rot).at(i), visAVis(positionPiece, i));
-               
-               if (!imageComplete(rotationsP.at(rot).at(i), visAVis(indicePiece, i)) ) {
-                  piecesPlaceable = false;
-               }
-               //piecesPlaceable = true;
+      Piece piece = aUtiliser.at(indicePiece);
+      
+      vector<vector<size_t>> adj = getAdjacents(indicePiece);
+      Pieces rotationsP;
+      rotationsP.push_back(piece);
+      rotation(piece, 0, rotationsP);
+      bool piecesPlaceable = true;
+      
+      // on parcourt toutes les rotations de la pieces
+      for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
+         // on regarde si la rotation peut être placée
+         for (int i = 0; i < 4; ++i) {
+            //piecesPlaceable = imageComplete(rotationsP.at(rot).at(i), visAVis(positionPiece, i));
+            
+            if (!imageComplete(rotationsP.at(rot).at(i), visAVis(indicePiece, i)) ) {
+               piecesPlaceable = false;
             }
-            // Si elle peut être placée
-            if (piecesPlaceable) {
-               // On la met à la bonne position sur le plan
-               plan.at(indicePiece) = rotationsP.at(rot);
-               
-               // On appelle la récursive afin de continuer
-               casseTeteReq(aUtiliser, plan, indicePiece+1);
-               
-               plan.at(indicePiece) = PIECE_VIDE;
+            //piecesPlaceable = true;
+         }
+         // Si elle peut être placée
+         if (piecesPlaceable) {
+            // On la met à la bonne position sur le plan
+            plan.at(indicePiece) = rotationsP.at(rot);
+            
+            // On appelle la récursive afin de continuer
+            casseTeteReq(aUtiliser, plan, indicePiece+1);
+            
+            plan.at(indicePiece) = PIECE_VIDE;
          }
       }
    }
@@ -324,3 +327,5 @@ AttachementType visAVis(size_t positionPiece, size_t positionImage) {
    }
    return NONE;
 }
+
+#endif /* clarisseMain_hpp */
