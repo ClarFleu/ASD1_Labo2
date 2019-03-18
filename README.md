@@ -48,3 +48,6 @@ D
 |                                    |
 |                  3                |
 +------------------------+
+
+
+Il devrait y avoir 2 solutions différentes avec chacune 4 rotations donc solutions devrait être une liste de 8 plan de 9 pieces.

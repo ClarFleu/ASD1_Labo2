@@ -234,25 +234,18 @@ void casseTete(Pieces& listePieces, Pieces& plan) {
 
 bool piecePeutEtrePlacee(const Piece& piece, size_t position, const Pieces& plan) {
    bool rep = true;
+   
    if (position % 3 >= 1 && !imageComplete(plan.at(position-1).at(1), piece.at(3))) {
       rep = false;
-   } else {
-      rep = true;
    }
    if (position % 3 <= 1 && !imageComplete(plan.at(position+1).at(3), piece.at(1))) {
       rep = false;
-   } else {
-      rep = true;
    }
-   if (position > 2 && !imageComplete(plan.at(position-3).at(0), piece.at(0))) {
+   if (position > 2 && !imageComplete(plan.at(position-3).at(2), piece.at(0))) {
       rep = false;
-   } else {
-      rep = true;
    }
-   if (position < 6 && !imageComplete(plan.at(position+3).at(2), piece.at(2))) {
+   if (position < 6 && !imageComplete(plan.at(position+3).at(0), piece.at(2))) {
       rep = false;
-   } else {
-      rep = true;
    }
    
    return rep;
@@ -421,6 +414,7 @@ AttachementType visAVis(size_t positionPiece, size_t positionImage) {
    }
    return NONE;
 }
+
 
 
 #endif /* clarisseMain_hpp */

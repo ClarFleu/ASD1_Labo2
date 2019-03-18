@@ -1,10 +1,12 @@
-//
-//  clarisse.cpp
-//  Labo2
-//
-//  Created by Clarisse Fleurimont on 17.03.19.
-//  Copyright © 2019 Clarisse Fleurimont. All rights reserved.
-//
+/* ---------------------------
+ Laboratoire    : 02
+ Fichier        : main.cpp
+ Auteur(s)      : Alban, Clarisse et Janis
+ Date           : 18.03.2019
+ 
+ But            : Creer une fonction recursive permettant de
+                  trouver toutes les solutions au puzzle impossible
+ --------------------------- */
 
 #include <iostream>
 
@@ -13,300 +15,135 @@
 
 using namespace std;
 
-/****************************
- * Déclaration de variables *
- ****************************/
-const Piece PIECE_VIDE = {NONE, NONE, NONE, NONE};
+// On cree une piece vide
+const Piece BLANK{ NONE, NONE, NONE, NONE};
 
-// Toutes les pieces possibles (y compris les rotations)
-Pieces pieces = PIECES;
+// Le vecteurs de Pieces contenant toutes les solutions trouvees
+using Solutions = vector<Pieces>;
 
-// Compteur de solutions --> devrait être égal à toutesLesSolutions.size()
-unsigned nbSolutions = 0;
+/**
+ * @brief <#description#>
+ * @param first (AttachementType)
+ * @param second (AttachementType)
+ * @returns true (bool)
+ */
+bool estAttachableAttachementType(AttachementType first, AttachementType second);
 
-Pieces plan(9);
-
-/***************************
- * Déclaration de methodes *
- ***************************/
-void afficherSolution(const Pieces& sol);
-
+/**
+ * @brief <#description#>
+ * @param  jeu (Pieces)
+ * @param position1 (int)
+ * @param position2 (int)
+ * @returns true (bool)
+ */
 bool estAttachable(const Pieces& jeu, int position1, int position2);
 
+/**
+ * @brief <#description#>
+ * @param oldJeu (Pieces)
+ * @param freePieces (Pieces)
+ * @param solutions (Pieces)
+ * @returns solutions (Pieces)
+ */
+Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions);
+
+/**
+ * @brief <#description#>
+ * @param newPiece (Piece)
+ * @param position (int)
+ * @param jeu (Pieces)
+ * @returns true (bool)
+ */
+bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu);
+
+/**
+ * @brief <#description#>
+ * @param up (Piece)
+ * @param down (Piece)
+ * @param horizontal (bool)
+ * @returns true (bool)
+ */
+bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal);
+
+/**
+ * @brief Surcharge de l'operateur de flux afin d'afficher une piece
+ * @param lhs (ostream) flux auqel on ajoute la piece a afficher
+ * @param rhs (Piece) piece a afficher
+ * @returns lhs (ostream) flux apres l'ajout de la piece a afficher
+ */
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs);
 
+/**
+ * @brief Surcharge de l'operateur de flux pour afficher un AttachmentType
+ * @param lhs (ostream) operateur de flux passe en argument et a miôdifier
+ * @param rhs (AttachmentType) l'image a afficher
+ * @returns lhs (ostream) apres l'ajout de rhs dans le flux
+ */
 std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs);
 
+/**
+ * @brief Surcharge de l'operateur d'egalite, deux pieces sont egales si elles sont des rotation l'une de l'autre
+ * @param lhs (Piece) permiere piece a tester
+ * @param rhs (Piece) seconde piece a tester
+ * @returns true (bool) si les deux pieces sont des rotations de la meme piece, false sinon
+ */
 bool operator==(const Piece& lhs, const Piece& rhs);
 
-void rotation(const Piece& piece, int rotNum, Pieces& rotations);
+/**
+ * @brief Teste si deux pieces sont exactement les memes (memes images aux memes positions)
+ * @param piece1 (Piece) premiere piece a tester
+ * @param piece2 (Piece) seconde piece a tester
+ * @returns true (bool) si les deux pieces passees en arguments son EXACTEMENT les memes, false sinon
+ */
+bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2);
 
-void casseTete(Pieces& listePieces, Pieces& plan);
-void casseTeteX(const Pieces& listePieces, unsigned indicePiece, Pieces& plan);
+/**
+ * @brief Fait un nombre de rotations voulues dans le sens inverse dea aiguilles d'une montre sur une piece
+ * @param oldPiece (Piece) piece initiale
+ * @param nbr (int) nombre de rotations a faire
+ * @returns newPiece (Piece) la piece oldpiece apres nbr rotations
+ */
+Piece rotationSimple(const Piece& oldPiece, int nbr);
 
-AttachementType visAVis(size_t positionPiece, size_t positionImage);
-
-bool memePiece(const Piece& lhs, const Piece& rhs);
-
-bool piecePeutEtrePlacee(const Piece& piece, size_t position, const Pieces& plan);
-
-/********
- * Main *
- ********/
 int main() {
-   for (size_t i = 0; i < 9; ++i) {
-      plan.at(i) = PIECE_VIDE;
+   
+   Solutions mesSolu;
+   
+   Pieces jeuTest = {
+      BLANK, BLANK, BLANK,
+      BLANK, BLANK, BLANK,
+      BLANK, BLANK, BLANK
+   };
+   
+   Pieces freePieces = PIECES;
+   
+   fonctionRecursion(jeuTest, freePieces, mesSolu);
+   
+   cout << "Notre fonction récursive trouve les " << mesSolu.size()
+        << " solutions suivantes :" << endl << endl;
+   int i = 0;
+   for (const Pieces& P : mesSolu) {
+      cout << ++i << "] ";
+      for (const Piece&p : P) {
+         cout << p << " ";
+      }
+      cout << endl;
    }
-   
-   cout << PIECES.size() << " pieces." << endl;
-   /*
-   for (int i = 0; i < PIECES.size(); ++i) {
-      pieces.push_back(PIECES.at(i));
-      rotation(PIECES.at(i), 0, pieces);
-   }
-   cout << pieces.size() << " rotations en tout." << endl;
-   */
-   
-   //casseTeteX(pieces, 0, plan);
-   casseTete(pieces, plan);
-   //placerPiece(solution, 0, 0);
-   
-   cout << "Nb solution totale : " << nbSolutions << endl;
-   
-   /* affichage de toutes les pieces et leurs rotations
-   for (size_t i = 0; i < pieces.size(); ++i) {
-      cout << pieces.at(i) << endl;
-   }*/
+   cout << endl;
    
    return 0;
 }
 
-/***************************
- * Définitions de methodes *
- ***************************/
-void casseTeteX(const Pieces& listePieces, unsigned indicePiece, Pieces& plan) {
-   if (listePieces.size() <= indicePiece) {
-      bool sol = true;
-      for (int i = 0; i < plan.size(); ++i) {
-         if (plan.at(i)==PIECE_VIDE) {
-            sol = false;
-            break;
-         }
-      }
-      if (sol) {
-         ++nbSolutions;
-         afficherSolution(plan);
-      }
-      return;
-   }
-
-   Piece piece = listePieces.at(indicePiece);
-   
-   Pieces rotationsP;
-   rotationsP.push_back(piece);
-   rotation(piece, 0, rotationsP);
-   
-   // on parcourt toutes les rotations de la pieces
-   for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
-      
-      int positionVide = -1;
-      for (int i = 0; i < plan.size(); ++i) {
-         if (plan.at(i) == PIECE_VIDE) {
-            positionVide = i;
-            break;
-         }
-      }
-      if (positionVide < 0) {
-         return;
-      }
-      
-      bool piecesPlaceable = true;
-      
-      //piecesPlaceable = imageComplete(rotationsP.at(rot).at(i), visAVis(positionPiece, i));
-      if (positionVide % 3 >= 1 && !imageComplete(plan.at(positionVide-1).at(1), piece.at(3))) {
-         piecesPlaceable = false;
-      }
-      if (positionVide % 3 <= 1 && !imageComplete(plan.at(positionVide+1).at(3), piece.at(1))) {
-         piecesPlaceable = false;
-      }
-      if (positionVide > 2 && !imageComplete(plan.at(positionVide-3).at(0), piece.at(0))) {
-         piecesPlaceable = false;
-      }
-      if (positionVide < 6 && !imageComplete(plan.at(positionVide+3).at(2), piece.at(2))) {
-         piecesPlaceable = false;
-      }
-      
-      piecesPlaceable = true;
-      
-      // On verifie si la piece est déjà placée
-      for (int i = 0; i < plan.size(); ++i) {
-         if (plan.at(i) == piece) {
-            piecesPlaceable = false;
-            break;
-         }
-      }
-      
-      // Si elle peut être placée
-      if (piecesPlaceable) {
-         // On la met à la bonne position sur le plan
-         plan.at(positionVide) = rotationsP.at(rot);
-         
-         // On appelle la récursive afin de continuer
-         casseTeteX(listePieces, indicePiece+1, plan);
-         
-         plan.at(positionVide) = PIECE_VIDE;
-      }
-   }
-}
-
-void casseTete(Pieces& listePieces, Pieces& plan) {
-   if (listePieces.size() == 0) {
-      bool sol = true;
-      for (int i = 0; i < plan.size(); ++i) {
-         if (plan.at(i)==PIECE_VIDE) {
-            sol = false;
-            break;
-         }
-      }
-      if (sol) {
-         ++nbSolutions;
-         afficherSolution(plan);
-      }
-      return;
-   }
-   
-   
-   for (size_t pieceAPlacer = 0; pieceAPlacer < listePieces.size(); ++pieceAPlacer) {
-      
-      
-      Piece piece = listePieces.at(pieceAPlacer);
-      
-      Pieces rotationsP;
-      rotationsP.push_back(piece);
-      rotation(piece, 0, rotationsP);
-      
-      // on parcourt toutes les rotations de la pieces
-      for (size_t rot = 0; rot < rotationsP.size(); ++rot) {
-         
-         int positionVide = -1;
-         for (int i = 0; i < plan.size(); ++i) {
-            if (plan.at(i) == PIECE_VIDE) {
-               positionVide = i;
-               break;
-            }
-         }
-         if (positionVide < 0) {
-            return;
-         }
-         
-         bool piecesPlaceable = piecePeutEtrePlacee(piece, positionVide, plan);
-         
-         // On verifie si la piece est déjà placée
-         for (int i = 0; i < plan.size(); ++i) {
-            if (memePiece(plan.at(i), piece)) {
-               piecesPlaceable = false;
-               break;
-            }
-         }
-         
-         // Si elle peut être placée
-         if (piecesPlaceable) {
-            // On la met à la bonne position sur le plan
-            plan.at(positionVide) = rotationsP.at(rot);
-            
-            // On l'enlève des pieces à placer
-            Piece tmp = listePieces.at(pieceAPlacer);
-            listePieces.erase(listePieces.begin()+pieceAPlacer);
-            
-            // On appelle la récursive afin de continuer
-            casseTete(listePieces, plan);
-            
-            listePieces.push_back(tmp);
-            plan.at(positionVide) = PIECE_VIDE;
-         }
-      }
-   }
-}
-
-bool piecePeutEtrePlacee(const Piece& piece, size_t position, const Pieces& plan) {
-   bool rep = true;
-   if (position % 3 >= 1 && !imageComplete(plan.at(position-1).at(1), piece.at(3))) {
-      rep = false;
-   } else {
-      rep = true;
-   }
-   if (position % 3 <= 1 && !imageComplete(plan.at(position+1).at(3), piece.at(1))) {
-      rep = false;
-   } else {
-      rep = true;
-   }
-   if (position > 2 && !imageComplete(plan.at(position-3).at(0), piece.at(0))) {
-      rep = false;
-   } else {
-      rep = true;
-   }
-   if (position < 6 && !imageComplete(plan.at(position+3).at(2), piece.at(2))) {
-      rep = false;
-   } else {
-      rep = true;
-   }
-   
-   return rep;
-}
-
-void afficherSolution(const Pieces& sol) {
-   for (int i = 0; i < sol.size();++i) {
-      cout << sol.at(i) << " ";
-      if (i%3==2) {
-         //cout << endl;
-      }
-   }
-   cout << endl;
-}
-
-void rotation(const Piece& piece, int rotNum, Pieces& rotations) {
-   
-   if (rotNum == 3) {
-      return;
-   } else {
-      Piece r;
-      
-      AttachementType temp = piece.at(3);
-      
-      for (int i = 1; i < 4; ++i) {
-         r.at(i) = piece.at(i - 1);
-      }
-      r.at(0) = temp;
-      
-      rotations.push_back(r);
-      
-      rotation(r, rotNum + 1, rotations);
-   }
-}
-
-bool memePiece(const Piece& lhs, const Piece& rhs) {
-   Pieces p;
-   p.push_back(lhs);
-   rotation(lhs, 0, p);
-   for (int i = 0; i < p.size(); ++i) {
-      if (p.at(i) == rhs) {
-         return true;
-      }
-   }
-   return false;
-}
-
 bool operator==(const Piece& lhs, const Piece& rhs) {
-
+   
    return (EXACTEMENTmemePiece(lhs, rhs) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 1)) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 2)) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 3)));
-
+   
 }
 
 bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
-
    for (int i = 0; i < 4; ++i) {
       if (piece1.at(i) != piece2.at(i)) {
          return false;
@@ -315,119 +152,188 @@ bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
    return true;
 }
 
-bool imageComplete(const AttachementType& im1, const AttachementType& im2) {
-   switch (im1) {
-      case FILLE_HAUT:       return (im2 == FILLE_BAS       || im2 == NONE);
-      case FILLE_BAS:        return (im2 == FILLE_HAUT      || im2 == NONE);
-      case DAME_HAUT:        return (im2 == DAME_BAS        || im2 == NONE);
-      case DAME_BAS:         return (im2 == DAME_HAUT       || im2 == NONE);
-      case ARROSOIR_GAUCHE:  return (im2 == ARROSOIR_DROIT  || im2 == NONE);
-      case ARROSOIR_DROIT:   return (im2 == ARROSOIR_GAUCHE || im2 == NONE);
-      case GATEAU_GAUCHE:    return (im2 == GATEAU_DROIT    || im2 == NONE);
-      case GATEAU_DROIT:     return (im2 == GATEAU_GAUCHE   || im2 == NONE);
-      case ARROSOIR_INVERSE: return (im2 == NONE);
-      case NONE:             return true;
-         
+std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
+   switch (rhs) {
+      case FILLE_HAUT:        return lhs << "FILLE_HAUT";
+      case FILLE_BAS:         return lhs << "FILLE_BAS";
+      case DAME_HAUT:         return lhs << "DAME_HAUT";
+      case DAME_BAS:          return lhs << "DAME_BAS";
+      case ARROSOIR_GAUCHE:   return lhs << "ARROSOIR_GAUCHE";
+      case ARROSOIR_DROIT:    return lhs << "ARROSOIR_DROIT";
+      case GATEAU_GAUCHE:     return lhs << "GATEAU_GAUCHE";
+      case GATEAU_DROIT:      return lhs << "GATEAU_DROIT";
+      case ARROSOIR_INVERSE:  return lhs << "ARROSOIR_INVERSE";
+      case NONE:              return lhs << "NONE";
+      default:                return lhs;
+   }
+   
+}
+
+std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
+   
+   for(size_t k = 0; k < PIECES.size(); ++k){
+      if(rhs == PIECES.at(k)){
+         for(int l = 0; l < 4; ++l){
+            char c = 'a';
+            if(EXACTEMENTmemePiece(rotationSimple(PIECES.at(k),l),rhs))
+               return lhs << k + 1 << char (c + l);
+         }
+      }
+   }
+   
+   return lhs;
+}
+
+Piece rotationSimple(const Piece& oldPiece, int nbr) {
+   
+   Piece newPiece = oldPiece;
+   
+   for (int i = 0; i < nbr; i++) {
+      AttachementType epave = newPiece.at(0);
+      
+      for (int i = 0; i < 3; i++)
+         newPiece.at(i) = newPiece.at(i + 1);
+      
+      newPiece.at(3) = epave;
+   }
+   
+   return newPiece;
+}
+
+bool estAttachableAttachementType(AttachementType first, AttachementType second) {
+   if (first == NONE || second == NONE)
+      return true;
+   
+   else if (first == second || first == ARROSOIR_INVERSE || second == ARROSOIR_INVERSE)
+      return false;
+   
+   else if (first / 2 == second / 2)//division entière
+      return true;
+   
+   else
+      return false;
+}
+
+bool estAttachable(const Pieces& jeu, int position1, int position2) {
+   int pre;
+   int post;
+   
+   if (position1 > position2) {
+      post = position1;
+      pre = position2;
+   } else {
+      post = position2;
+      pre = position1;
+   }
+   
+   int relatifHori = (post % 3)-(pre % 3);
+   int relatifVerti = (post / 3)-(pre / 3);
+   
+   if (relatifHori == 0 && relatifVerti == 1)
+      return estAttachableCoteACote(jeu.at(post), jeu.at(pre), false);
+   else if (relatifHori == 1 && relatifVerti == 0)
+      return estAttachableCoteACote(jeu.at(pre), jeu.at(post), true);
+   
+   cout << "something went wrong, not placable because no edge in contact" << endl;
+   return false;
+}
+
+bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal) {
+   return estAttachableAttachementType(up.at(0 + horizontal), down.at(2 + horizontal));
+}
+
+bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
+   
+   Pieces jeu = oldJeu;
+   jeu.at(position) = newPiece;
+   
+   switch (position) {
+      case 0:
+         return (estAttachable(jeu, 0, 1) &&
+                 estAttachable(jeu, 0, 3));
+      case 1:
+         return (estAttachable(jeu, 1, 0) &&
+                 estAttachable(jeu, 1, 4) &&
+                 estAttachable(jeu, 1, 2));
+      case 2:
+         return (estAttachable(jeu, 2, 1) &&
+                 estAttachable(jeu, 2, 5));
+      case 3:
+         return (estAttachable(jeu, 3, 0) &&
+                 estAttachable(jeu, 3, 4) &&
+                 estAttachable(jeu, 3, 6));
+      case 4:
+         return (estAttachable(jeu, 4, 1) &&
+                 estAttachable(jeu, 4, 3) &&
+                 estAttachable(jeu, 4, 7) &&
+                 estAttachable(jeu, 4, 5));
+      case 5:
+         return (estAttachable(jeu, 5, 2) &&
+                 estAttachable(jeu, 5, 4) &&
+                 estAttachable(jeu, 5, 8));
+      case 6:
+         return (estAttachable(jeu, 6, 3) &&
+                 estAttachable(jeu, 6, 7));
+      case 7:
+         return (estAttachable(jeu, 7, 6) &&
+                 estAttachable(jeu, 7, 4) &&
+                 estAttachable(jeu, 7, 8));
+      case 8:
+         return (estAttachable(jeu, 8, 7) &&
+                 estAttachable(jeu, 8, 5));
       default:
+         cout << "piece hors limite" << endl;
          return false;
    }
 }
 
-std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
-   switch (rhs) {
-      case FILLE_HAUT:       return lhs << "FILLE_HAUT";
-      case FILLE_BAS:        return lhs << "FILLE_BAS";
-      case DAME_HAUT:        return lhs << "DAME_HAUT";
-      case DAME_BAS:         return lhs << "DAME_BAS";
-      case ARROSOIR_GAUCHE:  return lhs << "ARROSOIR_GAUCHE";
-      case ARROSOIR_DROIT:   return lhs << "ARROSOIR_DROIT";
-      case GATEAU_GAUCHE:    return lhs << "GATEAU_GAUCHE";
-      case GATEAU_DROIT:     return lhs << "GATEAU_DROIT";
-      case ARROSOIR_INVERSE: return lhs << "ARROSOIR_INVERSE";
-      case NONE:             return lhs << "NONE";
-         
-      default:
-         return lhs;
-   }
+//recupere le string d'un jeu
+
+Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions) {
+
+   //on trouve la premiere place libre
+   auto iter = find(oldJeu.begin(), oldJeu.end(), BLANK);
+ 
+   int firstBLANKposition = (iter - oldJeu.begin());
+
+   // si le jeu est remplis, ca veut dire que c'est une solution
+   // sinon on continue, le jeu n'est pas fini
+   if (iter == oldJeu.end())
+      solutions.push_back(oldJeu);
    
-}
+   else {
+      //comme s'il y a des BLANKS il y a des pieces libre
+      if (freePieces.size() == 0)
+         cout << "plus de piece libre, ne devrait pas arriver" << endl;
+    
+      int selectedPiecePosition = 0;
 
+      do {
+         //recupere la prochaine piece libre
+         Piece selectedPiece = freePieces.at(selectedPiecePosition);
+         int rotationCounter = 0;
 
-
-std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
-
-   
-   for(size_t k=0; k<PIECES.size();k++){
-      if(rhs==PIECES.at(k)){
-         
-         for(int l=0; l<4;l++){
-            char c = 'a';
-            if(EXACTEMENTmemePiece(rotationSimple(PIECES.at(k),l),rhs)){
-               return lhs << k+1 << char (c+l);
-            }
+         while (rotationCounter < 4) {
             
+            
+            if (estPlacable(selectedPiece, firstBLANKposition, oldJeu)) {
+               
+               Pieces jeu = oldJeu;
+               Pieces freePiecesCopy = freePieces;
+               freePiecesCopy.erase(freePiecesCopy.begin() + selectedPiecePosition);
+               
+               jeu.at(firstBLANKposition) = selectedPiece;
+               fonctionRecursion(jeu, freePiecesCopy, solutions);
+               rotationCounter++;
+               selectedPiece = rotationSimple(selectedPiece, 1);
+            } else {
+               rotationCounter++;
+               selectedPiece = rotationSimple(selectedPiece, 1);
+            }
          }
-      }
-   }
-
-   return lhs;
-   
-}
-
-AttachementType visAVis(size_t positionPiece, size_t positionImage) {
-   switch (positionPiece) {
-      case 0: return NONE;
-      case 1:
-         if (positionImage == 3)
-            return plan.at(0).at(1);
-         else
-            return NONE;
-      case 2:
-         if (positionImage == 3)
-            return plan.at(1).at(1);
-         else
-            return NONE;
-      case 3:
-         if (positionImage == 0)
-            return plan.at(0).at(2);
-         else
-            return NONE;
-      case 4:
-         if (positionImage == 0)
-            return plan.at(1).at(2);
-         else if (positionImage == 3)
-            return plan.at(3).at(1);
-         else
-            return NONE;
-      case 5:
-         if (positionImage == 0)
-            return plan.at(2).at(2);
-         else if (positionImage == 3)
-            return plan.at(4).at(1);
-         else
-            return NONE;
-      case 6:
-         if (positionImage == 0)
-            return plan.at(3).at(2);
-         else
-            return NONE;
-      case 7:
-         if (positionImage == 0)
-            return plan.at(4).at(2);
-         else if (positionImage == 3)
-            return plan.at(6).at(1);
-         else
-            return NONE;
-      case 8:
-         if (positionImage == 0)
-            return plan.at(5).at(2);
-         else if (positionImage == 3)
-            return plan.at(7).at(1);
-         else
-            return NONE;
+         selectedPiecePosition++;
          
-      default:
-         break;
+      } while (selectedPiecePosition < freePieces.size());
    }
-   return NONE;
+   return oldJeu;
 }
