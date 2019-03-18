@@ -17,30 +17,25 @@
 
 using namespace std;
 
-// Clarisse
+/****************************
+ * Déclaration de variables *
+ ****************************/
 const Piece PIECE_VIDE = {NONE, NONE, NONE, NONE};
+
 // Toutes les pieces possibles (y compris les rotations)
-Pieces pieces;
+Pieces pieces = PIECES;
+
 // Compteur de solutions --> devrait être égal à toutesLesSolutions.size()
 unsigned nbSolutions = 0;
 
-unsigned piecesTentees = 0;
-// Vecteur de solution
-Pieces solution(9);
-// Vecteur contenant toutes les solutions trouvées
-vector<Pieces> toutesLesSolutions;
+Pieces plan(9);
 
-void placerPiece(Pieces& plan, size_t piece, unsigned positionPiece);
-
+/***************************
+ * Déclaration de methodes *
+ ***************************/
 void afficherSolution(const Pieces& sol);
 
 bool imageComplete(const AttachementType& im1, const AttachementType& im2);
-
-bool pieceValable(size_t posPiece);
-
-int pieceSuivante(int positionPiece);
-
-bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu);
 
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs);
 
@@ -50,26 +45,28 @@ bool operator==(const Piece& lhs, const Piece& rhs);
 
 void rotation(const Piece& piece, int rotNum, Pieces& rotations);
 
-// osdjpaéokdjsf
-void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece);
+void casseTete(Pieces& listePieces, Pieces& plan);
+
 AttachementType visAVis(size_t positionPiece, size_t positionImage);
-Pieces plan(9), plan1(9), plan2(9);
 
-
+/********
+ * Main *
+ ********/
 int main() {
    for (size_t i = 0; i < 9; ++i) {
       plan.at(i) = PIECE_VIDE;
    }
    
    cout << PIECES.size() << " pieces." << endl;
+   /*
+    for (int i = 0; i < PIECES.size(); ++i) {
+    pieces.push_back(PIECES.at(i));
+    rotation(PIECES.at(i), 0, pieces);
+    }
+    cout << pieces.size() << " rotations en tout." << endl;
+    */
    
-   for (int i = 0; i < PIECES.size(); ++i) {
-      pieces.push_back(PIECES.at(i));
-      rotation(PIECES.at(i), 0, pieces);
-   }
-   cout << pieces.size() << " rotations en tout." << endl;
-   
-   casseTete(PIECES, plan, 0);
+   casseTete(pieces, plan);
    //placerPiece(solution, 0, 0);
    
    cout << "Nb solution totale : " << nbSolutions << endl;
@@ -82,8 +79,11 @@ int main() {
    return 0;
 }
 
-void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece) {
-   if (indicePiece >= listePieces.size()) {
+/***************************
+ * Définitions de methodes *
+ ***************************/
+void casseTete(Pieces& listePieces, Pieces& plan) {
+   if (listePieces.size() == 0) {
       bool sol = true;
       for (int i = 0; i < plan.size(); ++i) {
          if (plan.at(i)==PIECE_VIDE) {
@@ -96,7 +96,11 @@ void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece) {
          afficherSolution(plan);
       }
       return;
-   } else {
+   }
+   
+   
+   for (size_t pieceAPlacer = 0; pieceAPlacer < listePieces.size(); ++pieceAPlacer) {
+      
       size_t positionVide = -1;
       for (size_t i = 0; i < plan.size(); ++i) {
          if (plan.at(i) == PIECE_VIDE) {
@@ -105,7 +109,7 @@ void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece) {
          }
       }
       
-      Piece piece = listePieces.at(indicePiece);
+      Piece piece = listePieces.at(pieceAPlacer);
       
       Pieces rotationsP;
       rotationsP.push_back(piece);
@@ -124,14 +128,14 @@ void casseTete(const Pieces& listePieces, Pieces& plan, int indicePiece) {
             //piecesPlaceable = true;
          }
          // Si elle peut être placée
-         if (piecesPlaceable) {
+         if (piecesPlaceable && positionVide < plan.size()) {
             // On la met à la bonne position sur le plan
             plan.at(positionVide) = rotationsP.at(rot);
-            
+            listePieces.erase(listePieces.begin()+pieceAPlacer);
             // On appelle la récursive afin de continuer
-            casseTete(listePieces, plan, indicePiece+1);
-            
-            plan.at(indicePiece) = PIECE_VIDE;
+            casseTete(listePieces, plan);
+            listePieces.push_back(piece);
+            plan.at(pieceAPlacer) = PIECE_VIDE;
          }
       }
    }
@@ -288,5 +292,6 @@ AttachementType visAVis(size_t positionPiece, size_t positionImage) {
    }
    return NONE;
 }
+
 
 #endif /* clarisseMain_hpp */
