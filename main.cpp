@@ -22,46 +22,46 @@ const Piece BLANK{ NONE, NONE, NONE, NONE};
 using Solutions = vector<Pieces>;
 
 /**
- * @brief <#description#>
- * @param first (AttachementType)
- * @param second (AttachementType)
- * @returns true (bool)
+ * @brief Verifie si les deux demi-images donnees en forment une entiere
+ * @param first (AttachementType) premiere demi-image
+ * @param second (AttachementType) seconde demi-image
+ * @returns true (bool) si les deux images correspondent, false sinon
  */
 bool estAttachableAttachementType(AttachementType first, AttachementType second);
 
 /**
- * @brief <#description#>
- * @param  jeu (Pieces)
- * @param position1 (int)
- * @param position2 (int)
- * @returns true (bool)
+ * @brief Verifie si les deux pieces aux positions donnees sont attachables sur le jeu donne
+ * @param  jeu (Pieces) le jeu sur lequel on desire placer les pieces
+ * @param position1 (int) position de la premiere piece
+ * @param position2 (int) position de la seconde piece
+ * @returns true (bool) si les pieces peuvent etre placees, false sinon
  */
 bool estAttachable(const Pieces& jeu, int position1, int position2);
 
 /**
- * @brief <#description#>
- * @param oldJeu (Pieces)
- * @param freePieces (Pieces)
- * @param solutions (Pieces)
- * @returns solutions (Pieces)
+ * @brief La fonction recursive permettant de trouver toute les solutions au puzzle impossible
+ * @param oldJeu (Pieces) plan de jeu de l'etape precedente
+ * @param freePieces (Pieces) pieces qu'il reste a placer sur le jeu
+ * @param solutions (Pieces) les solutions deja trouvees
+ * @returns oldJeu (Pieces) derniere version du jeu
  */
 Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions);
 
 /**
- * @brief <#description#>
- * @param newPiece (Piece)
- * @param position (int)
- * @param jeu (Pieces)
- * @returns true (bool)
+ * @brief Permet de tester si la piece donnee peut etre placee a la position donnee sur le jeu donne
+ * @param newPiece (Piece) nouvelle piece a placer sur le jeu
+ * @param position (int) position a laquelle il faut la placer
+ * @param jeu (Pieces) jeu sur lequel il faut placer la piece
+ * @returns true (bool) si la newPiece peut etre placee a la position position dans jeu
  */
 bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu);
 
 /**
- * @brief <#description#>
- * @param up (Piece)
- * @param down (Piece)
- * @param horizontal (bool)
- * @returns true (bool)
+ * @brief Test si une piece est attachable en fonction de sa position et de ses voisins eventuels
+ * @param up (Piece) piece au-dessu de la piece a tester
+ * @param down (Piece) piece au-dessous de la piece a tester
+ * @param horizontal (bool) permet de bouger a l'horizontale sur le jeu si c'est possible (true)
+ * @returns true (bool) si la piece peut etre placee, false sinon
  */
 bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal);
 
