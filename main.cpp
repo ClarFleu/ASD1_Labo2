@@ -121,9 +121,7 @@ int main() {
    
    cout << "Notre fonction récursive trouve les " << mesSolu.size()
         << " solutions suivantes :" << endl << endl;
-   int i = 0;
    for (const Pieces& P : mesSolu) {
-      cout << ++i << "] ";
       for (const Piece&p : P) {
          cout << p << " ";
       }
