@@ -183,7 +183,7 @@ std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
 }
 
 //on pourrait enlever le const et le &, pour retirer la ligne "Piece newPiece = oldPiece;"
-//le fait que cette fonction rerourne une Piece est la raison de pourquoi on lutilise plutot
+//le fait que cette fonction rerourne une Piece est la raison de pourquoi on l'utilise plutot
 //que juste rotate
 Piece rotationSimple(const Piece& oldPiece, int nbr) {
    Piece newPiece = oldPiece;
@@ -295,9 +295,7 @@ Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutio
       solutions.push_back(oldJeu);
 
    else {
-      //comme s'il y a des BLANKS il y a des pieces libre
-      //if (freePieces.size() == 0)
-      // cout << "plus de piece libre, ne devrait pas arriver" << endl;
+      //comme s'il y a des PIECE_VIDE il y a des pieces libres, on verifie pas s'il y a des pieces libres
 
       //selectedPiecePosition ne correspond PAS au numéro de piece, ce qui empeche de recuperer efficacement le string de solution
       int selectedPiecePosition = 0;
