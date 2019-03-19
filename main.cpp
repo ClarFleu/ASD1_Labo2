@@ -58,9 +58,9 @@ bool estPlacable(const Piece& newPiece, int position, const Pieces& jeu);
 
 /**
  * @brief Test si une piece est attachable en fonction de sa position et de ses voisins eventuels
- * @param up (Piece) piece au-dessu de la piece a tester
- * @param down (Piece) piece au-dessous de la piece a tester
- * @param horizontal (bool) permet de bouger a l'horizontale sur le jeu si c'est possible (true)
+ * @param up (Piece) piece au-dessu ou a gauche de la piece a tester
+ * @param down (Piece) piece au-dessous ou a droite de la piece a tester
+ * @param horizontal (bool) indique si les piece sont alignée horizontalement ou non
  * @returns true (bool) si la piece peut etre placee, false sinon
  */
 bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal);
@@ -119,7 +119,7 @@ int main() {
    
    fonctionRecursion(jeuTest, freePieces, mesSolu);
    
-   cout << "Notre fonction récursive trouve les " << mesSolu.size()
+   cout << "Notre fonction recursive trouve les " << mesSolu.size()
         << " solutions suivantes :" << endl << endl;
    for (const Pieces& P : mesSolu) {
       for (const Piece&p : P) {
@@ -199,13 +199,7 @@ Piece rotationSimple(const Piece& oldPiece, int nbr) {
 }
 
 bool estAttachableAttachementType(AttachementType first, AttachementType second) {
-   if (first == NONE || second == NONE)
-      return true;
-   
-   else if (first == second || first == ARROSOIR_INVERSE || second == ARROSOIR_INVERSE)
-      return false;
-   
-   else if (first / 2 == second / 2)//division entière
+   if ((first == NONE || second == NONE)||((first != second)&&(first / 2 == second / 2)))
       return true;
    
    else
