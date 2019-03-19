@@ -16,7 +16,7 @@
 using namespace std;
 
 // On cree une piece vide
-const Piece BLANK{ NONE, NONE, NONE, NONE};
+const Piece PIECE_VIDE{ NONE, NONE, NONE, NONE};
 
 // Le vecteurs de Pieces contenant toutes les solutions trouvees
 using Solutions = vector<Pieces>;
@@ -106,39 +106,39 @@ bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2);
 Piece rotationSimple(const Piece& oldPiece, int nbr);
 
 int main() {
-   
-   Solutions mesSolu;
-   
-   Pieces jeuTest = {
-      BLANK, BLANK, BLANK,
-      BLANK, BLANK, BLANK,
-      BLANK, BLANK, BLANK
+
+   Solutions mesSolutions;
+
+   Pieces jeuVide = {
+      PIECE_VIDE, PIECE_VIDE, PIECE_VIDE,
+      PIECE_VIDE, PIECE_VIDE, PIECE_VIDE,
+      PIECE_VIDE, PIECE_VIDE, PIECE_VIDE,
    };
-   
+
    Pieces freePieces = PIECES;
-   
-   fonctionRecursion(jeuTest, freePieces, mesSolu);
-   
-   cout << "Notre fonction recursive trouve les " << mesSolu.size()
-        << " solutions suivantes :" << endl << endl;
-   for (const Pieces& P : mesSolu) {
+
+   fonctionRecursion(jeuVide, freePieces, mesSolutions);
+
+   cout << "Notre fonction recursive trouve les " << mesSolutions.size()
+           << " solutions suivantes :" << endl << endl;
+   for (const Pieces& P : mesSolutions) {
       for (const Piece&p : P) {
          cout << p << " ";
       }
       cout << endl;
    }
    cout << endl;
-   
+
    return 0;
 }
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
-   
+
    return (EXACTEMENTmemePiece(lhs, rhs) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 1)) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 2)) ||
            EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 3)));
-   
+
 }
 
 bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
@@ -152,56 +152,55 @@ bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
 
 std::ostream& operator<<(std::ostream& lhs, const AttachementType& rhs) {
    switch (rhs) {
-      case FILLE_HAUT:        return lhs << "FILLE_HAUT";
-      case FILLE_BAS:         return lhs << "FILLE_BAS";
-      case DAME_HAUT:         return lhs << "DAME_HAUT";
-      case DAME_BAS:          return lhs << "DAME_BAS";
-      case ARROSOIR_GAUCHE:   return lhs << "ARROSOIR_GAUCHE";
-      case ARROSOIR_DROIT:    return lhs << "ARROSOIR_DROIT";
-      case GATEAU_GAUCHE:     return lhs << "GATEAU_GAUCHE";
-      case GATEAU_DROIT:      return lhs << "GATEAU_DROIT";
-      case ARROSOIR_INVERSE:  return lhs << "ARROSOIR_INVERSE";
-      case NONE:              return lhs << "NONE";
-      default:                return lhs;
+      case FILLE_HAUT: return lhs << "FILLE_HAUT";
+      case FILLE_BAS: return lhs << "FILLE_BAS";
+      case DAME_HAUT: return lhs << "DAME_HAUT";
+      case DAME_BAS: return lhs << "DAME_BAS";
+      case ARROSOIR_GAUCHE: return lhs << "ARROSOIR_GAUCHE";
+      case ARROSOIR_DROIT: return lhs << "ARROSOIR_DROIT";
+      case GATEAU_GAUCHE: return lhs << "GATEAU_GAUCHE";
+      case GATEAU_DROIT: return lhs << "GATEAU_DROIT";
+      case ARROSOIR_INVERSE: return lhs << "ARROSOIR_INVERSE";
+      case NONE: return lhs << "NONE";
+      default: return lhs;
    }
-   
+
 }
 
 std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
-   
-   for(size_t k = 0; k < PIECES.size(); ++k){
-      if(rhs == PIECES.at(k)){
-         for(int l = 0; l < 4; ++l){
+
+   for (size_t k = 0; k < PIECES.size(); ++k) {
+      if (rhs == PIECES.at(k)) {
+         for (int l = 0; l < 4; ++l) {
             char c = 'a';
-            if(EXACTEMENTmemePiece(rotationSimple(PIECES.at(k),l),rhs))
+            if (EXACTEMENTmemePiece(rotationSimple(PIECES.at(k), l), rhs))
                return lhs << k + 1 << char (c + l);
          }
       }
    }
-   
+
    return lhs;
 }
 
 Piece rotationSimple(const Piece& oldPiece, int nbr) {
-   
+
    Piece newPiece = oldPiece;
-   
+
    for (int i = 0; i < nbr; i++) {
       AttachementType epave = newPiece.at(0);
-      
+
       for (int i = 0; i < 3; i++)
          newPiece.at(i) = newPiece.at(i + 1);
-      
+
       newPiece.at(3) = epave;
    }
-   
+
    return newPiece;
 }
 
 bool estAttachableAttachementType(AttachementType first, AttachementType second) {
-   if ((first == NONE || second == NONE)||((first != second)&&(first / 2 == second / 2)))
+   if ((first == NONE || second == NONE) || ((first != second)&&(first / 2 == second / 2)))
       return true;
-   
    else
       return false;
 }
@@ -209,7 +208,7 @@ bool estAttachableAttachementType(AttachementType first, AttachementType second)
 bool estAttachable(const Pieces& jeu, int position1, int position2) {
    int pre;
    int post;
-   
+
    if (position1 > position2) {
       post = position1;
       pre = position2;
@@ -217,15 +216,15 @@ bool estAttachable(const Pieces& jeu, int position1, int position2) {
       post = position2;
       pre = position1;
    }
-   
+
    int relatifHori = (post % 3)-(pre % 3);
    int relatifVerti = (post / 3)-(pre / 3);
-   
+
    if (relatifHori == 0 && relatifVerti == 1)
       return estAttachableCoteACote(jeu.at(post), jeu.at(pre), false);
    else if (relatifHori == 1 && relatifVerti == 0)
       return estAttachableCoteACote(jeu.at(pre), jeu.at(post), true);
-   
+
    cout << "something went wrong, not placable because no edge in contact" << endl;
    return false;
 }
@@ -235,10 +234,11 @@ bool estAttachableCoteACote(const Piece& up, const Piece& down, bool horizontal)
 }
 
 bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
-   
+
    Pieces jeu = oldJeu;
+   //on place d'abord la piece dans le jeu puis on verifie si ca colle
    jeu.at(position) = newPiece;
-   
+
    switch (position) {
       case 0:
          return (estAttachable(jeu, 0, 1) &&
@@ -284,48 +284,46 @@ bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
 Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions) {
 
    //on trouve la premiere place libre
-   auto iter = find(oldJeu.begin(), oldJeu.end(), BLANK);
- 
-   int firstBLANKposition = (iter - oldJeu.begin());
+   int firstVIDEposition = (find(oldJeu.begin(), oldJeu.end(), PIECE_VIDE) - oldJeu.begin());
 
    // si le jeu est remplis, ca veut dire que c'est une solution
    // sinon on continue, le jeu n'est pas fini
-   if (iter == oldJeu.end())
+   if (firstVIDEposition == oldJeu.size())
       solutions.push_back(oldJeu);
-   
+
    else {
       //comme s'il y a des BLANKS il y a des pieces libre
-      if (freePieces.size() == 0)
-         cout << "plus de piece libre, ne devrait pas arriver" << endl;
-    
+      //if (freePieces.size() == 0)
+      // cout << "plus de piece libre, ne devrait pas arriver" << endl;
+
       int selectedPiecePosition = 0;
 
-      do {
+      while (selectedPiecePosition < freePieces.size()) {
          //recupere la prochaine piece libre
          Piece selectedPiece = freePieces.at(selectedPiecePosition);
+
          int rotationCounter = 0;
 
          while (rotationCounter < 4) {
-            
-            
-            if (estPlacable(selectedPiece, firstBLANKposition, oldJeu)) {
-               
-               Pieces jeu = oldJeu;
+
+
+            if (estPlacable(selectedPiece, firstVIDEposition, oldJeu)) {
+
+               Pieces nextJeu = oldJeu;
                Pieces freePiecesCopy = freePieces;
+               //on retire la piece utilisée des pieces libre
                freePiecesCopy.erase(freePiecesCopy.begin() + selectedPiecePosition);
-               
-               jeu.at(firstBLANKposition) = selectedPiece;
-               fonctionRecursion(jeu, freePiecesCopy, solutions);
-               rotationCounter++;
-               selectedPiece = rotationSimple(selectedPiece, 1);
-            } else {
-               rotationCounter++;
-               selectedPiece = rotationSimple(selectedPiece, 1);
+               //on place la piece dans notre prochain jeu 
+               nextJeu.at(firstVIDEposition) = selectedPiece;
+               fonctionRecursion(nextJeu, freePiecesCopy, solutions);
             }
+            rotationCounter++;
+            selectedPiece = rotationSimple(selectedPiece, 1);
          }
          selectedPiecePosition++;
-         
-      } while (selectedPiecePosition < freePieces.size());
+
+      }
    }
+   //on a testé toutes les possibilités à partir de ce jeu
    return oldJeu;
 }
