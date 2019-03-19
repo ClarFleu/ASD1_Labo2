@@ -9,7 +9,7 @@
  --------------------------- */
 
 #include <iostream>
-
+#include <string>
 #include "pieces.h"
 #include <algorithm>
 
@@ -95,7 +95,7 @@ bool operator==(const Piece& lhs, const Piece& rhs);
  * @param piece2 (Piece) seconde piece a tester
  * @returns true (bool) si les deux pieces passees en arguments son EXACTEMENT les memes, false sinon
  */
-bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2);
+bool MemeRotationPiece(const Piece& piece1, const Piece& piece2);
 
 /**
  * @brief Fait un nombre de rotations voulues dans le sens inverse dea aiguilles d'une montre sur une piece
@@ -134,14 +134,14 @@ int main() {
 
 bool operator==(const Piece& lhs, const Piece& rhs) {
 
-   return (EXACTEMENTmemePiece(lhs, rhs) ||
-           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 1)) ||
-           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 2)) ||
-           EXACTEMENTmemePiece(lhs, rotationSimple(rhs, 3)));
+   return (MemeRotationPiece(lhs, rhs) ||
+           MemeRotationPiece(lhs, rotationSimple(rhs, 1)) ||
+           MemeRotationPiece(lhs, rotationSimple(rhs, 2)) ||
+           MemeRotationPiece(lhs, rotationSimple(rhs, 3)));
 
 }
 
-bool EXACTEMENTmemePiece(const Piece& piece1, const Piece& piece2) {
+bool MemeRotationPiece(const Piece& piece1, const Piece& piece2) {
    for (int i = 0; i < 4; ++i) {
       if (piece1.at(i) != piece2.at(i)) {
          return false;
@@ -173,7 +173,7 @@ std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
       if (rhs == PIECES.at(k)) {
          for (int l = 0; l < 4; ++l) {
             char c = 'a';
-            if (EXACTEMENTmemePiece(rotationSimple(PIECES.at(k), l), rhs))
+            if (MemeRotationPiece(rotationSimple(PIECES.at(k), l), rhs))
                return lhs << k + 1 << char (c + l);
          }
       }
@@ -182,50 +182,50 @@ std::ostream& operator<<(std::ostream& lhs, const Piece& rhs) {
    return lhs;
 }
 
+//on pourrait enlever le const et le &, pour retirer la ligne "Piece newPiece = oldPiece;"
+//le fait que cette fonction rerourne une Piece est la raison de pourquoi on lutilise plutot
+//que juste rotate
 Piece rotationSimple(const Piece& oldPiece, int nbr) {
-
    Piece newPiece = oldPiece;
-
-   for (int i = 0; i < nbr; i++) {
-      AttachementType epave = newPiece.at(0);
-
-      for (int i = 0; i < 3; i++)
-         newPiece.at(i) = newPiece.at(i + 1);
-
-      newPiece.at(3) = epave;
-   }
-
+   rotate(newPiece.begin(),newPiece.begin()+nbr,newPiece.end());
    return newPiece;
 }
 
 bool estAttachableAttachementType(AttachementType first, AttachementType second) {
-   if ((first == NONE || second == NONE) || ((first != second)&&(first / 2 == second / 2)))
-      return true;
-   else
-      return false;
+   /* si une attache est NONE, ca s'acrocche, 
+    * si on organise les AttachementType dans un tableau 2x5, on remarque que les lignes
+    * correspondent aux accroches (a l'exception de la ligne 5, qui est "overruled/masquée" 
+    * par la condition du NONE de toute façon) et donc on peut savoir si 2 attaches 
+    * sont compatibles, si leurs division entière sont les memes et si elles ne sont
+    * pas la meme attache.
+    */
+
+   return ((first == NONE || second == NONE) || ((first != second)&&(first / 2 == second / 2)));
 }
 
 bool estAttachable(const Pieces& jeu, int position1, int position2) {
-   int pre;
-   int post;
+   int avant;
+   int apres;
 
+   //determine quelle piece est placée avant l'autre
    if (position1 > position2) {
-      post = position1;
-      pre = position2;
+      apres = position1;
+      avant = position2;
    } else {
-      post = position2;
-      pre = position1;
+      apres = position2;
+      avant = position1;
    }
 
-   int relatifHori = (post % 3)-(pre % 3);
-   int relatifVerti = (post / 3)-(pre / 3);
+   //determine les distances entre les pieces, modulo et division entiere 3 car c'est une grille de 3x3
+   int distancefHorizontale = (apres % 3)-(avant % 3);
+   int distanceVerticale = (apres / 3)-(avant / 3);
 
-   if (relatifHori == 0 && relatifVerti == 1)
-      return estAttachableCoteACote(jeu.at(post), jeu.at(pre), false);
-   else if (relatifHori == 1 && relatifVerti == 0)
-      return estAttachableCoteACote(jeu.at(pre), jeu.at(post), true);
+   if (distancefHorizontale == 0 && distanceVerticale == 1)
+      return estAttachableCoteACote(jeu.at(apres), jeu.at(avant), false);
+   else if (distancefHorizontale == 1 && distanceVerticale == 0)
+      return estAttachableCoteACote(jeu.at(avant), jeu.at(apres), true);
 
-   cout << "something went wrong, not placable because no edge in contact" << endl;
+   cout << "erreur, les deux pieces ne sont pas cote a cote, ce message ne devrait jamais apparaitre" << endl;
    return false;
 }
 
@@ -238,6 +238,11 @@ bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
    Pieces jeu = oldJeu;
    //on place d'abord la piece dans le jeu puis on verifie si ca colle
    jeu.at(position) = newPiece;
+
+   /*les numéros correspondent a la place dans la grille 
+    * 0 1 2
+    * 3 4 5
+    * 6 7 8*/
 
    switch (position) {
       case 0:
@@ -279,8 +284,6 @@ bool estPlacable(const Piece& newPiece, int position, const Pieces& oldJeu) {
    }
 }
 
-//recupere le string d'un jeu
-
 Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutions& solutions) {
 
    //on trouve la premiere place libre
@@ -296,12 +299,14 @@ Pieces fonctionRecursion(const Pieces& oldJeu, const Pieces& freePieces, Solutio
       //if (freePieces.size() == 0)
       // cout << "plus de piece libre, ne devrait pas arriver" << endl;
 
+      //selectedPiecePosition ne correspond PAS au numéro de piece, ce qui empeche de recuperer efficacement le string de solution
       int selectedPiecePosition = 0;
 
       while (selectedPiecePosition < freePieces.size()) {
          //recupere la prochaine piece libre
          Piece selectedPiece = freePieces.at(selectedPiecePosition);
 
+         //rotationCounter correspond bien a la rotation de la piece, ce qui permetrait de retrouver efficacement le string de solution 
          int rotationCounter = 0;
 
          while (rotationCounter < 4) {
